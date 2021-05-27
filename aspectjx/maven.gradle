@@ -15,6 +15,9 @@ uploadArchives {
             repository(url: "$nexusRepositoryUrl") {
                 authentication(userName: nexusUserName, password: nexusPassword)
             }
+            //本地仓库路径
+            //def depath = file('/Users/wancg/.m2/repository')
+            //repository(url: "file://${depath.absolutePath}")
 
             pom.project {
                 name LIB_ARTIFACT

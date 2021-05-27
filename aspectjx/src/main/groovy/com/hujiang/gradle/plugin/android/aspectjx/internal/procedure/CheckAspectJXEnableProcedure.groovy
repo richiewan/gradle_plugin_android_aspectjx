@@ -59,7 +59,7 @@ class CheckAspectJXEnableProcedure extends AbsProcedure {
 
         //aspectjx disabled
         if (!ajxExtensionConfig.enabled || isExcludeAll) {
-            AJXUtils.doWorkWithNoAspectj(transformInvocation)
+            AJXUtils.doWorkWithNoAspectj(transformInvocation, variantCache)
             return false
         }
 

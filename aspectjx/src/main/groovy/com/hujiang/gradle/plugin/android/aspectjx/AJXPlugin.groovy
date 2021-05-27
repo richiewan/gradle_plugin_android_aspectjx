@@ -33,11 +33,19 @@ class AJXPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
 
+        println('AJXPlugin')
+
         project.repositories {
             mavenLocal()
+            maven { url 'https://jitpack.io' }
+        }
+
+        project.configurations {
+            aspectjrt_path
         }
 
         project.dependencies {
+            aspectjrt_path 'org.aspectj:aspectjrt:1.9.5'
             if (project.gradle.gradleVersion > "4.0") {
                 project.logger.debug("gradlew version > 4.0")
                 implementation 'org.aspectj:aspectjrt:1.9.5'

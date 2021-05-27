@@ -44,6 +44,8 @@ class AJXTaskManager {
 
     void batchExecute() {
         batchTaskScheduler.tasks.each { AJXTask task ->
+            println("AJXTaskManager batchExecute aspectPath=${aspectPath}")
+            println("AJXTaskManager batchExecute task=${task}")
             task.encoding = encoding
             task.aspectPath = aspectPath
             task.classPath = classPath

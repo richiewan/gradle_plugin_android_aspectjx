@@ -136,31 +136,40 @@ class AJXUtils {
     /**
      * @param transformInvocation
      */
-    static void doWorkWithNoAspectj(TransformInvocation transformInvocation) {
+    static void doWorkWithNoAspectj(TransformInvocation transformInvocation, VariantCache variantCache) {
         LoggerFactory.getLogger(AJXPlugin).debug("do nothing ~~~~~~~~~~~~~~~~~~~~~~~~")
         if (transformInvocation.incremental) {
             incrementalCopyFiles(transformInvocation)
         } else {
-            fullCopyFiles(transformInvocation)
+            fullCopyFiles(transformInvocation,variantCache)
         }
     }
 
-    static void fullCopyFiles(TransformInvocation transformInvocation) {
+    static void fullCopyFiles(TransformInvocation transformInvocation, VariantCache variantCache) {
         transformInvocation.outputProvider.deleteAll()
 
+        println("fullCopyFiles transformInvocation="+transformInvocation.dump())
+        def dirInputs = []
         transformInvocation.inputs.each { TransformInput input ->
             input.directoryInputs.each { DirectoryInput dirInput->
-                File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", dirInput.contentTypes, dirInput.scopes, Format.JAR)
-                mergeJar(dirInput.file, excludeJar)
+                println("fullCopyFiles dirInput="+dirInput.dump())
+                dirInputs.add(dirInput.file)
             }
-
             input.jarInputs.each { JarInput jarInput->
                 def dest = transformInvocation.outputProvider.getContentLocation(jarInput.name
                         , jarInput.contentTypes
                         , jarInput.scopes
                         , Format.JAR)
+                println("fullCopyFiles file="+ jarInput.file.dump())
+                println("fullCopyFiles dest="+ dest.dump())
                 FileUtils.copyFile(jarInput.file, dest)
             }
+        }
+        if (dirInputs != null && dirInputs.size() > 0){
+            File includeJar = transformInvocation.getOutputProvider().getContentLocation("include", variantCache.contentTypes,
+                    variantCache.scopes, Format.JAR)
+            FileUtils.deleteQuietly(includeJar)
+            mergeAllJar(dirInputs,includeJar)
         }
     }
 
@@ -325,6 +334,39 @@ class AJXUtils {
             }
         }
     }
+
+    static void mergeAllJar(List<File> sourceDirs, File targetJar) {
+        if (sourceDirs == null) {
+            throw new IllegalArgumentException("sourceDir should not be null")
+        }
+
+        if (targetJar == null) {
+            throw new IllegalArgumentException("targetJar should not be null")
+        }
+
+        if (!targetJar.parentFile.exists()) {
+            FileUtils.forceMkdir(targetJar.getParentFile())
+        }
+
+        JarMerger jarMerger = new JarMerger(targetJar)
+        try {
+            jarMerger.setFilter(new JarMerger.IZipEntryFilter() {
+                @Override
+                boolean checkEntry(String archivePath) throws JarMerger.IZipEntryFilter.ZipAbortException {
+                    return archivePath.endsWith(SdkConstants.DOT_CLASS)
+                }
+            })
+
+            for ( File sourceDir : sourceDirs ){
+                jarMerger.addFolder(sourceDir)
+            }
+        } catch (Exception e) {
+            LoggerFactory.getLogger(AJXPlugin).warn("mergeJar(${sourceDirs}, ${targetJar}", e)
+        } finally {
+            jarMerger.close()
+        }
+    }
+
 
     static void mergeJar(File sourceDir, File targetJar) {
         if (sourceDir == null) {

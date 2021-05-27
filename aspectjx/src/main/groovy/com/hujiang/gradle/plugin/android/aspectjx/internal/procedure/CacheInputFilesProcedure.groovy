@@ -44,6 +44,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
         // "com.hujiang" 过滤 含"com.hujiang"的文件和jar
         //
         project.logger.debug("~~~~~~~~~~~~~~~~~~~~cache input files")
+        println("CacheAspectFilesProcedure cache input files")
         BatchTaskScheduler taskScheduler = new BatchTaskScheduler()
 
         transformInvocation.inputs.each { TransformInput input ->
@@ -59,7 +60,9 @@ class CacheInputFilesProcedure extends AbsProcedure {
                                 String path = item.absolutePath
                                 String subPath = path.substring(dirInput.file.absolutePath.length())
                                 String transPath = subPath.replace(File.separator, ".")
-
+                                println("CacheAspectFilesProcedure path="+path)
+                                println("CacheAspectFilesProcedure subPath="+subPath)
+                                println("CacheAspectFilesProcedure transPath="+transPath)
                                 boolean isInclude = AJXUtils.isIncludeFilterMatched(transPath, ajxExtensionConfig.includes) &&
                                         !AJXUtils.isExcludeFilterMatched(transPath, ajxExtensionConfig.excludes)
                                 variantCache.add(item, new File((isInclude ? variantCache.includeFilePath : variantCache.excludeFilePath) + subPath))
@@ -70,9 +73,11 @@ class CacheInputFilesProcedure extends AbsProcedure {
                         if (AJXUtils.countOfFiles(variantCache.excludeFileDir) > 0) {
                             File excludeJar = transformInvocation.getOutputProvider().getContentLocation("exclude", variantCache.contentTypes,
                                     variantCache.scopes, Format.JAR)
+                            println("CacheAspectFilesProcedure excludeJar="+excludeJar.toString())
+                            FileUtils.deleteQuietly(excludeJar)
                             AJXUtils.mergeJar(variantCache.excludeFileDir, excludeJar)
                         }
-
+                        println("CacheInputFilesProcedure taskScheduler.addTask transformInvocation.inputs")
                         return null
                     }
                 })
@@ -90,7 +95,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
                                     , Format.JAR)
                             FileUtils.copyFile(jarInput.file, dest)
                         }
-
+                        println("CacheInputFilesProcedure taskScheduler.addTask input.jarInputs")
                         return null
                     }
                 })
@@ -102,6 +107,7 @@ class CacheInputFilesProcedure extends AbsProcedure {
 
         variantCache.commitIncludeJarConfig()
 
+        println("CacheInputFilesProcedure doWorkContinuously true")
         return true
     }
 }

@@ -34,10 +34,10 @@ class AJXProcedure extends AbsProcedure {
 
     AJXProcedure(Project proj) {
         super(proj, null, null)
-
+        //println("AJXProcedure proj="+${proj})
         project = proj
         ajxCache = new AJXCache(project)
-
+        println("AJXProcedure proj="+ project.dump())
         System.setProperty("aspectj.multithreaded", "true")
 
         def configuration = new AJXConfig(project)
@@ -76,7 +76,7 @@ class AJXProcedure extends AbsProcedure {
         if (!logDir.exists()) {
             logDir.mkdirs()
         }
-
+        println("AJXProcedure logDir="+ logDir.toString())
         Dump.setDumpDirectory(logDir.absolutePath)
     }
 }

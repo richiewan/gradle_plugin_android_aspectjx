@@ -41,19 +41,32 @@ class AJXTask implements ITask {
     String outputDir
     String outputJar
 
+    static final ASPECTJRT = "aspectjrt"
+
     AJXTask(Project proj) {
         project = proj
     }
 
     @Override
     Object call() throws Exception {
+        println('AJXTask call')
         final def log = project.logger
+
+        String classpath = classPath.join(File.pathSeparator)
+        if (!classpath.contains(ASPECTJRT)){
+            String aspectjrtPath = ""
+            project.configurations.aspectjrt_path.files.each { aspectjrtPath = it }
+            if (!aspectjrtPath.isEmpty()){
+                classpath += File.pathSeparator
+                classpath += aspectjrtPath
+            }
+        }
         def args = [
                 "-showWeaveInfo",
                 "-encoding", encoding,
                 "-source", sourceCompatibility,
                 "-target", targetCompatibility,
-                "-classpath", classPath.join(File.pathSeparator),
+                "-classpath", classpath,
                 "-bootclasspath", bootClassPath
         ]
 
@@ -96,6 +109,7 @@ class AJXTask implements ITask {
 
         MessageHandler handler = new MessageHandler(true)
         Main m = new Main()
+        println('AJXTask main args='+ Arrays.toString(args))
         m.run(args as String[], handler)
         for (IMessage message : handler.getMessages(null, true)) {
             switch (message.getKind()) {

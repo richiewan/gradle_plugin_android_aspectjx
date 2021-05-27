@@ -94,7 +94,7 @@ class UpdateAspectOutputProcedure extends AbsProcedure {
         }
 
         ajxTaskManager.batchExecute()
-
+        println("UpdateAspectOutputProcedure result true")
         return true
     }
 }

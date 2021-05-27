@@ -37,6 +37,8 @@ class BatchTaskScheduler {
     }
 
     void execute() {
+
+        println("BatchTaskScheduler tasks=${tasks.size()}")
         executorService.invokeAll(tasks)
 
         tasks.clear()

@@ -42,6 +42,7 @@ class CacheAspectFilesProcedure extends AbsProcedure {
     @Override
     boolean doWorkContinuously() {
         project.logger.debug("~~~~~~~~~~~~~~~~~~~~cache aspect files")
+        println("CacheAspectFilesProcedure cache aspect files")
         //缓存aspect文件
         BatchTaskScheduler batchTaskScheduler = new BatchTaskScheduler()
 
@@ -53,6 +54,7 @@ class CacheAspectFilesProcedure extends AbsProcedure {
                     Object call() throws Exception {
                         dirInput.file.eachFileRecurse { File item ->
                             if (AJXUtils.isAspectClass(item)) {
+                                println("CacheAspectFilesProcedure collect aspect file:${item.absolutePath}")
                                 project.logger.debug("~~~~~~~~~~~~collect aspect file:${item.absolutePath}")
                                 String path = item.absolutePath
                                 String subPath = path.substring(dirInput.file.absolutePath.length())
@@ -80,7 +82,9 @@ class CacheAspectFilesProcedure extends AbsProcedure {
                                 byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
                                 File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                 if (AJXUtils.isAspectClass(bytes)) {
+                                    println("CacheAspectFilesProcedure collect aspect file:${entryName}")
                                     project.logger.debug("~~~~~~~~~~~collect aspect file:${entryName}")
+                                    println("CacheAspectFilesProcedure collect aspect file:${cacheFile.toString()}")
                                     variantCache.add(bytes, cacheFile)
                                 }
                             }
@@ -95,12 +99,14 @@ class CacheAspectFilesProcedure extends AbsProcedure {
         }
 
         batchTaskScheduler.execute()
-
+        println("variantCache.aspectDir:" + variantCache.aspectDir.dump())
         if (AJXUtils.countOfFiles(variantCache.aspectDir) == 0) {
-            AJXUtils.doWorkWithNoAspectj(transformInvocation)
+            AJXUtils.doWorkWithNoAspectj(transformInvocation, variantCache)
+            println("CacheAspectFilesProcedure result false")
             return false
         }
 
+        println("CacheAspectFilesProcedure doWorkContinuously true")
         return true
     }
 }

@@ -135,6 +135,7 @@ class UpdateInputFilesProcedure extends AbsProcedure {
 
         variantCache.commitIncludeJarConfig()
 
+        println("UpdateInputFilesProcedure result true")
         return true
     }
 }

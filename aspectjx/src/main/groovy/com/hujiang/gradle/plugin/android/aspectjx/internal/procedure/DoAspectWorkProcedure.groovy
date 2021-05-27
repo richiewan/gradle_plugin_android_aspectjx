@@ -41,12 +41,15 @@ class DoAspectWorkProcedure extends AbsProcedure {
 
     @Override
     boolean doWorkContinuously() {
+        println('DoAspectWorkProcedure doWorkContinuously')
         //do aspectj real work
         project.logger.debug("~~~~~~~~~~~~~~~~~~~~do aspectj real work")
         ajxTaskManager.aspectPath << variantCache.aspectDir
         ajxTaskManager.classPath << variantCache.includeFileDir
         ajxTaskManager.classPath << variantCache.excludeFileDir
-
+        println('DoAspectWorkProcedure variantCache.aspectDir='+variantCache.aspectDir.dump())
+        println('DoAspectWorkProcedure variantCache.includeFileDir='+variantCache.includeFileDir.dump())
+        println('DoAspectWorkProcedure variantCache.excludeFileDir='+variantCache.excludeFileDir.dump())
         //process class files
         AJXTask ajxTask = new AJXTask(project)
         File includeJar = transformInvocation.getOutputProvider().getContentLocation("include", variantCache.contentTypes,
@@ -60,6 +63,7 @@ class DoAspectWorkProcedure extends AbsProcedure {
 
         ajxTask.outputJar = includeJar.absolutePath
         ajxTask.inPath << variantCache.includeFileDir
+        println('DoAspectWorkProcedure ajxTaskManager addTask')
         ajxTaskManager.addTask(ajxTask)
 
         //process jar files
@@ -70,9 +74,11 @@ class DoAspectWorkProcedure extends AbsProcedure {
                 if (variantCache.isIncludeJar(jarInput.file.absolutePath)) {
                     AJXTask ajxTask1 = new AJXTask(project)
                     ajxTask1.inPath << jarInput.file
-
+                    println("DoAspectWorkProcedure jarInput.file.absolutePath = ${jarInput.file.absolutePath}")
                     File outputJar = transformInvocation.getOutputProvider().getContentLocation(jarInput.name, jarInput.getContentTypes(),
                             jarInput.getScopes(), Format.JAR)
+                    println("DoAspectWorkProcedure outputJar.getParentFile= ${outputJar.getParentFile()}")
+
                     if (!outputJar.getParentFile()?.exists()) {
                         outputJar.getParentFile()?.mkdirs()
                     }
@@ -86,6 +92,7 @@ class DoAspectWorkProcedure extends AbsProcedure {
 
         ajxTaskManager.batchExecute()
 
+        println("DoAspectWorkProcedure doWorkContinuously true")
         return true
     }
 }

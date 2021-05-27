@@ -57,6 +57,8 @@ abstract class AbsProcedure {
     }
 
     boolean doWorkContinuously() {
+        println('AbsProcedure doWorkContinuously')
+        println('AbsProcedure doWorkContinuously procedures size=' +procedures.size())
         for (AbsProcedure procedure : procedures) {
             if (!procedure.doWorkContinuously()) {
                 break

@@ -37,6 +37,7 @@ class AJXTransform extends Transform {
 
     AJXTransform(Project proj) {
         ajxProcedure = new AJXProcedure(proj)
+        println('AJXTransform ajxProcedure='+ ajxProcedure.dump())
     }
 
     @Override
@@ -63,30 +64,37 @@ class AJXTransform extends Transform {
     @Override
     void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
 
+        println('transform')
         Project project = ajxProcedure.project
 
         String transformTaskVariantName = transformInvocation.context.getVariantName()
+
         VariantCache variantCache = new VariantCache(ajxProcedure.project, ajxProcedure.ajxCache, transformTaskVariantName)
-        
         ajxProcedure.with(new CheckAspectJXEnableProcedure(project, variantCache, transformInvocation))
 
         if (transformInvocation.incremental) {
+            println('ajxProcedure incremental build')
             //incremental build
             ajxProcedure.with(new UpdateAspectFilesProcedure(project, variantCache, transformInvocation))
             ajxProcedure.with(new UpdateInputFilesProcedure(project, variantCache, transformInvocation))
             ajxProcedure.with(new UpdateAspectOutputProcedure(project, variantCache, transformInvocation))
         } else {
+            println('ajxProcedure not incremental')
             //delete output and cache before full build
             transformInvocation.outputProvider.deleteAll()
             variantCache.reset()
-
+            println('CacheAspectFilesProcedure')
             ajxProcedure.with(new CacheAspectFilesProcedure(project, variantCache, transformInvocation))
+            println('CacheInputFilesProcedure')
             ajxProcedure.with(new CacheInputFilesProcedure(project, variantCache, transformInvocation))
+            println('DoAspectWorkProcedure')
             ajxProcedure.with(new DoAspectWorkProcedure(project, variantCache, transformInvocation))
         }
 
+        println('ajxProcedure.with')
         ajxProcedure.with(new OnFinishedProcedure(project, variantCache, transformInvocation))
 
+        println('ajxProcedure.doWorkContinuously')
         ajxProcedure.doWorkContinuously()
     }
 }

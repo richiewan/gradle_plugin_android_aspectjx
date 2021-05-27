@@ -40,6 +40,7 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
     @Override
     boolean doWorkContinuously() {
         project.logger.debug("~~~~~~~~~~~~~~~~~~~~update aspect files")
+        println('UpdateAspectFilesProcedure doWorkContinuously')
         //update aspect files
         BatchTaskScheduler taskScheduler = new BatchTaskScheduler()
 
@@ -51,6 +52,7 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
                         dirInput.changedFiles.each { File file, Status status ->
                             if (AJXUtils.isAspectClass(file)) {
                                 project.logger.debug("~~~~~~~~~~~collect aspect file from Dir:${file.absolutePath}")
+                                println("UpdateAspectFilesProcedure collect aspect file from Dir:${file.absolutePath}")
                                 variantCache.incrementalStatus.isAspectChanged = true
                                 String path = file.absolutePath
                                 String subPath = path.substring(dirInput.file.absolutePath.length())
@@ -92,6 +94,7 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
                                     byte[] bytes = ByteStreams.toByteArray(jarFile.getInputStream(jarEntry))
                                     File cacheFile = new File(variantCache.aspectPath + File.separator + entryName)
                                     if (AJXUtils.isAspectClass(bytes)) {
+                                        println("UpdateAspectFilesProcedure collect aspect file from JAR:${entryName}")
                                         project.logger.debug("~~~~~~~~~~~~~~~~~collect aspect file from JAR:${entryName}")
                                         variantCache.incrementalStatus.isAspectChanged = true
                                         if (jarInput.status == Status.REMOVED) {
@@ -119,9 +122,11 @@ class UpdateAspectFilesProcedure extends AbsProcedure {
 
         if (AJXUtils.countOfFiles(variantCache.aspectDir) == 0) {
             //do work with no aspectj
-            AJXUtils.fullCopyFiles(transformInvocation)
+            AJXUtils.fullCopyFiles(transformInvocation, variantCache)
+            println("UpdateAspectFilesProcedure result false")
             return false
         }
+        println("UpdateAspectFilesProcedure result true")
 
         return true
     }
